@@ -39,6 +39,10 @@ spec:
             httpGet:
               path: /
               port: http
+          env:
+          {{- with .Values.extraEnvironmentVars }}
+            {{- toYaml .| nindent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "konga.fullname" . }}-config
