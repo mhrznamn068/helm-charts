@@ -3,4 +3,4 @@ appVersion: "1.0"
 description: A Helm chart for Kubernetes
 name: konga
 icon: https://raw.githubusercontent.com/pantsel/konga/HEAD/screenshots/konga-logo.png
-version: 1.0.2
+version: 1.0.3

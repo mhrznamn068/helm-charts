@@ -30,6 +30,8 @@ data:
   TOKEN_SECRET: {{ .Values.config.token_secret }}
   KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: "{{ .Values.config.konga_node_data }}"
   KONGA_SEED_USER_DATA_SOURCE_FILE: "{{ .Values.config.konga_user_data }}"
+  NO_AUTH: "{{default false .Values.config.no_auth }}"
+  BASE_URL: "{{ .Values.config.base_url }}"
   {{- end }}
 
   {{- if .Values.ldap }}
