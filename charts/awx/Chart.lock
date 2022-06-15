@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.6.3
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.1.5
+- name: memcached
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.1.1
+digest: sha256:ecd018812390fa10959c91a26f8fcb229e1eda206090ab187bd780937d33266d
+generated: "2022-06-07T23:11:08.860651404+05:45"
