@@ -13,9 +13,9 @@ package manager.
 To install the chart with the release name `my-release`:
 
 ```console
-helm repo add rfy-awx https://raw.githubusercontent.com/rfyio/ansible-awx-helm-chart/master/
+helm repo add qumulus qumulustechnology.github.io/helm-charts 
 helm repo update
-helm install --name my-release rfy-awx/awx
+helm install --name my-release qumulus/chart-name
 ```
 
 To install the development version:
@@ -36,7 +36,7 @@ This charts embeds chart dependencies specified in the requirements.yaml file:
 - rabbitmq
 
 **Note**: Currently, this chart is not ready to be used with external postgresql,
-memcached or rabbitmq. PR welcomed.
+memcached or rabbitmq.
 
 ## Uninstalling the Chart
 
