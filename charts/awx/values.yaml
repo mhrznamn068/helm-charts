@@ -110,6 +110,8 @@ rabbitmq:
         loopback_users.guest = false
         ## awx vhost
         default_vhost = awx
+  volumePermissions:
+    enabled: true
 
 # Chart values https://github.com/helm/charts/blob/master/stable/postgresql/values.yaml
 postgresql:
