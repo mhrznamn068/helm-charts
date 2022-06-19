@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "awx.fullname" . }}-application-config
+  labels:
+    app.kubernetes.io/name: {{ include "awx.name" . }}
+    helm.sh/chart: {{ include "awx.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  secret_key: {{ .Values.awx_secret_key }}
+  awx_settings: |
+    import os
+    import socket
+    ADMINS = ()
+
+    def get_secret():
+        if os.path.exists("/etc/tower/SECRET_KEY"):
+            return open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+        return os.getenv("SECRET_KEY", "privateawx")
+
+    AWX_PROOT_ENABLED = False
+
+    # Automatically deprovision pods that go offline
+    AWX_AUTO_DEPROVISION_INSTANCES = True
+
+    #Autoprovisioning should replace this
+    CLUSTER_HOST_ID = socket.gethostname()
+    SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+
+    REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
+
+    STATIC_ROOT = '/var/lib/awx/public/static'
+    PROJECTS_ROOT = '/var/lib/awx/projects'
+    JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
+    # SECRET_KEY = file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    SECRET_KEY = get_secret()
+    ALLOWED_HOSTS = ['*']
+    INTERNAL_API_URL = 'http://127.0.0.1:8052'
+    # Custom helm values
+    TOWER_URL_BASE = '{{ .Values.awx_url_base }}'
+    SERVER_EMAIL = '{{ .Values.server_email }}'
+    DEFAULT_FROM_EMAIL = '{{ .Values.default_from_email }}'
+    EMAIL_SUBJECT_PREFIX = '{{ .Values.email_subject_prefix }}'
+    EMAIL_HOST = '{{ .Values.email_host }}'
+    EMAIL_PORT = '{{ .Values.email_port }}'
+    EMAIL_HOST_USER = '{{ .Values.email_host_user }}'
+    EMAIL_HOST_PASSWORD = '{{ .Values.email_host_password }}'
+    EMAIL_USE_TLS = {{ .Values.email_use_tls }}
+
+    LOGGING['handlers']['console'] = {
+        '()': 'logging.StreamHandler',
+        'level': 'DEBUG',
+        'formatter': 'simple',
+    }
+
+    LOGGING['loggers']['django.request']['handlers'] = ['console']
+    LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
+    LOGGING['loggers']['awx']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
+    LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
+    LOGGING['loggers']['social']['handlers'] = ['console']
+    LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
+    LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
+    LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
+    LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['fact_receiver'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
+    LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
+
+    DATABASES = {
+        'default': {
+            'ATOMIC_REQUESTS': True,
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USER'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': "{{ include "awx.fullname" . }}-postgresql",
+            'PORT': "5432",
+        }
+    }
+
+    BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
+        "{{ .Values.rabbitmq.rabbitmq.username }}",
+        "{{ .Values.rabbitmq.rabbitmq.password }}",
+        "{{ include "awx.fullname" . }}-rabbitmq",
+        "{{ default "5672" .Values.rabbitmq.service.port }}",
+        "{{ default "awx" .Values.rabbitmq.vhost }}")
+
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
+                    'ROUTING': 'awx.main.routing.channel_routing',
+                    'CONFIG': {'url': BROKER_URL}}
+    }
+
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '{}:{}'.format("{{ include "awx.fullname" . }}-memcached", "{{ default "11211" .Values.memcached_port }}")
+        },
+        'ephemeral': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+
+    USE_X_FORWARDED_PORT = True
