@@ -4,8 +4,8 @@ name: awx
 version: 1.5.0
 appVersion: 2.2.4
 maintainers:
-  - name: kim0
-    email: email.ahmedkamal@googlemail.com
+  - name: Qumulus Technology LTD
+    email: admin@qumulus.com
 sources:
   - https://github.com/ansible/awx
 keywords:
