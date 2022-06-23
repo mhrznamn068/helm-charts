@@ -126,6 +126,7 @@ postgresql:
     username: "awx"
     password: "awx"
     database: "awx"
+    existingSecret: "awx-postgres-secret"
   persistence:
     enabled: true
   metrics:

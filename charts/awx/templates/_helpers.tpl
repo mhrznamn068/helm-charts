@@ -30,3 +30,12 @@ Create chart name and version as used by the chart label.
 {{- define "awx.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{- define "awx.postgresql.secretName" -}}
+{{- if .Values.postgresql.auth.existingSecret -}}
+    {{- printf "%s" (tpl .Values.postgresql.auth.existingSecret $) -}}
+{{- else -}}
+    {{- printf "%s-%s" (include "common.names.fullname" .) "postgresql" -}}
+{{- end -}}
+{{- end -}}
+
