@@ -32,10 +32,14 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{- define "awx.postgresql.secretName" -}}
-{{- if .Values.postgresql.auth.existingSecret -}}
-    {{- printf "%s" (tpl .Values.postgresql.auth.existingSecret $) -}}
+{{- if .Values.postgresql.enabled -}}
+  {{- if .Values.postgresql.auth.existingSecret -}}
+      {{- printf "%s" (tpl .Values.postgresql.auth.existingSecret $) -}}
+  {{- else -}}
+      {{- printf "%s-%s" (include "common.names.fullname" .) "postgresql" -}}
+  {{- end -}}
 {{- else -}}
-    {{- printf "%s-%s" (include "common.names.fullname" .) "postgresql" -}}
+      {{- printf "%s" (tpl .Values.awx_db_secret $) -}}
 {{- end -}}
 {{- end -}}
 

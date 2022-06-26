@@ -33,6 +33,9 @@ email_host_user: ''
 email_host_password: ''
 email_use_tls: 'False'
 
+# DB secrets if extenal DB is used
+awx_db_secret: 'awx-postgres-auth'
+
 deployment:
   annotations: {}
 
