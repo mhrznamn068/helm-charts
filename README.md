@@ -5,7 +5,7 @@ Helm's [documentation](https://helm.sh/docs) to get started.
 
 Once Helm has been set up correctly, add the repo as follows:
 
-  helm repo add qumulus qumulustechnology.github.io/helm-charts
+  helm repo add mhrznamn068 https://mhrznamn068.github.io/helm-charts
 
 If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages.  You can then run `helm search repo
@@ -13,7 +13,7 @@ the latest versions of the packages.  You can then run `helm search repo
 
 To install the chart-name chart:
 
-    helm install my-chart-name qumulus/chart-name
+    helm install my-chart-name mhrznamn068/chart-name
 
 To uninstall the chart:
 
