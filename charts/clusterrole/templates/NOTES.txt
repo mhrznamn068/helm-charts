@@ -1,0 +1,13 @@
+Ensure your cluster has the necessary permissions. Apply the following resources:
+
+ClusterRole:
+  - Name: {{ .Values.clusterrole.name }}
+
+ServiceAccount:
+  - Name: {{ .Values.clusterrole.serviceaccount.name }}
+
+Secret:
+  - Name: {{ .Values.clusterrole.secret.name }}
+
+ClusterRoleBinding:
+  - Name: {{ .Values.clusterrolebinding.name }}
