@@ -11,3 +11,6 @@ Secret:
 
 ClusterRoleBinding:
   - Name: {{ .Values.clusterrolebinding.name }}
+
+Cronjob:
+  - Name: {{ .Values.secret.name }}

@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  repository: 
+  repository: mhrznamn068/awscli-kubectl-helm-tf:latest
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -12,6 +12,11 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+excludeNamespaces:    #namespaces to be skipped for creating secrets
+  - kube-node-lease
+  - kube-public
+  - default
+  - kube-system
 
 clusterrole:
   name: 
@@ -20,6 +25,18 @@ clusterrole:
   secret:
     name : 
 clusterrolebinding:
+  name: 
+
+job:
+  name: 
+
+container:
+  name: 
+
+cluster: 
+  region: 
+  name: 
+secret:
   name: 
 
 resources: {}
