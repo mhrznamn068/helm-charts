@@ -1,36 +1,46 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.job.name }}
-  namespace: {{ .Values.nameOverride }}
+  name: {{ include "refresh-ecr-token.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  schedule: "0 /8 * * *"
+  schedule: "0 */4 * * *"
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
         spec:
-          serviceAccountName: {{ .Values.clusterrole.serviceaccount.name }}
+          serviceAccountName: {{ include "refresh-ecr-token.serviceAccountName" . }}
+          imagePullSecrets: {{ .Values.imagePullSecrets }}
           containers:
-          - name: {{ .Values.container.name }}
+          - name: refresh-ecr-token
             image: {{ .Values.image.repository }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
             env:
-              - name: AWS_DEFAULT_REGION
-                value: {{ .Values.cluster.region }}
-              - name: CLUSTER_NAME
-                value: {{ .Values.cluster.name }}
+              - name: AWS_ACCESS_KEY_ID
+                value: {{ .Values.ecrCredentials.awsAccessKeyId }}
+              - name: AWS_SECRET_ACCESS_KEY
+                value: {{ .Values.ecrCredentials.awsSecretAccessKey }}
+              - name: AWS_REGION
+                value: {{ .Values.ecrCredentials.region }}
               - name: EXCLUDE_NAMESPACES
                 value: | 
                     {{- range .Values.excludeNamespaces }}
                       {{ . }}
                     {{- end }}
               - name: SECRET_NAME
-                value: {{ .Values.secret.name }}
+                value: {{ .Values.secretName }}
             command:
               - bash
               - "-c"
-              - |                
+              - |
+                aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                aws configure set default.region ${AWS_REGION}       
                 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-                TOKEN=$(aws ecr --region=$AWS_DEFAULT_REGION get-authorization-token --output text --query authorizationData[].authorizationToken | base64 -d | cut -d: -f2)     
+                TOKEN=$(aws ecr --region=$AWS_REGION get-authorization-token --output text --query authorizationData[].authorizationToken | base64 -d | cut -d: -f2)     
                 NAMESPACES=$(kubectl get ns -o jsonpath="{.items[*].metadata.name}")
                 echo "NAMESPACES: $NAMESPACES"
                 for NS in ${NAMESPACES[@]}; do
@@ -48,7 +58,7 @@ spec:
                     fi
                    echo "-> Refreshing secrets in namespace: $NS"
                    kubectl -n $NS delete secret --ignore-not-found "$SECRET_NAME"
-                   kubectl -n $NS create secret docker-registry "$SECRET_NAME" --docker-server=https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com --docker-username=AWS --docker-password="$TOKEN"
+                   kubectl -n $NS create secret docker-registry "$SECRET_NAME" --docker-server=https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com --docker-username=AWS --docker-password="$TOKEN"
                    echo
                 done
           restartPolicy: OnFailure

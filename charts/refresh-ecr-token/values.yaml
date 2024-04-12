@@ -1,0 +1,25 @@
+image:
+  repository: mhrznamn068/awscli-kubectl-helm-tf:latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: ""
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+ecrCredentials:
+  awsAccessKeyId: ""
+  awsSecretAccessKey: ""
+  region: ""
+
+excludeNamespaces:    #namespaces to be skipped for creating secrets
+  - kube-node-lease
+  - kube-public
+  - default
+  - kube-system
+  - calico-system
+
+secretName: regcred

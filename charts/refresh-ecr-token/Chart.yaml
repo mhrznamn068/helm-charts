@@ -1,8 +1,7 @@
 apiVersion: v2
-name: clusterrole
+name: refresh-ecr-token
 description: A Helm chart for creating ServiceAccount with clusterrole to authenticate with the cluster to run Cronjob. 
              The purpose of the cronjob is to run every 8 hour to replace the secret for pulling images from ECR for the namespace.
-
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -17,7 +16,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.1
+version: 0.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -25,10 +24,12 @@ version: 0.1.1
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
 keywords:
-  - clusterrole
-  - serviceaccount
+  - refresh-ecr-token
+  - aws
   - cronjob
 maintainers:
+  - name: Aman Maharjan
+    email: mhrznamn068@gmail.com
   - name: Anish Sedhai
     email: aniecesedhai@gmail.com
 sources:
