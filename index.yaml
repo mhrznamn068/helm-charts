@@ -1,0 +1,27 @@
+apiVersion: v1
+entries:
+  refresh-ecr-token:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-15T02:03:16.17159275Z"
+    description: A Helm chart for creating ServiceAccount with clusterrole to authenticate
+      with the cluster to run Cronjob. The purpose of the cronjob is to run every
+      8 hour to replace the secret for pulling images from ECR for the namespace.
+    digest: 2eff18e9b7135e0888d6b74f0ffb956320ca8fceb99dcd08a44d8469bcc47562
+    keywords:
+    - refresh-ecr-token
+    - aws
+    - cronjob
+    maintainers:
+    - email: mhrznamn068@gmail.com
+      name: Aman Maharjan
+    - email: aniecesedhai@gmail.com
+      name: Anish Sedhai
+    name: refresh-ecr-token
+    sources:
+    - https://github.com/mhrznamn068/helm-charts
+    type: application
+    urls:
+    - https://github.com/mhrznamn068/helm-charts/releases/download/refresh-ecr-token-1.0.0/refresh-ecr-token-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-04-15T02:03:16.171599072Z"
