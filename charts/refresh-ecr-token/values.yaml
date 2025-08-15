@@ -23,3 +23,5 @@ excludeNamespaces:    #namespaces to be skipped for creating secrets
   - calico-system
 
 secretName: regcred
+
+restartArgocdImageUpdater: false  # Set to true to restart argocd-image-updater after updating secrets

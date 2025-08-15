@@ -32,6 +32,8 @@ spec:
                     {{- end }}
               - name: SECRET_NAME
                 value: {{ .Values.secretName }}
+              - name: RESTART_ARGOCD_IMAGE_UPDATER
+                value: {{ .Values.restartArgocdImageUpdater | quote }}
             command:
               - bash
               - "-c"
@@ -61,7 +63,10 @@ spec:
                    kubectl -n $NS create secret docker-registry "$SECRET_NAME" --docker-server=https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com --docker-username=AWS --docker-password="$TOKEN"
                    echo
                 done
-                # Restart argocd-image-updater deployment to pick up new ECR token
-                echo "-> Restarting argocd-image-updater deployment"
-                kubectl rollout restart deployment argocd-image-updater -n argocd
+
+                if [[ "$RESTART_ARGOCD_IMAGE_UPDATER" == "true" ]]; then
+                  # Restart argocd-image-updater deployment to pick up new ECR token
+                  echo "-> Restarting argocd-image-updater deployment"
+                  kubectl rollout restart deployment argocd-image-updater -n argocd
+                fi
           restartPolicy: OnFailure
