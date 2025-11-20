@@ -43,6 +43,7 @@ spec:
                 aws configure set default.region ${AWS_REGION}       
                 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
                 TOKEN=$(aws ecr --region=$AWS_REGION get-authorization-token --output text --query authorizationData[].authorizationToken | base64 -d | cut -d: -f2)     
+                TOKEN=$(aws ecr --region=$AWS_REGION get-authorization-token --output text | awk '{print $2}' | base64 -d | cut -d: -f2)
                 NAMESPACES=$(kubectl get ns -o jsonpath="{.items[*].metadata.name}")
                 echo "NAMESPACES: $NAMESPACES"
                 for NS in ${NAMESPACES[@]}; do
