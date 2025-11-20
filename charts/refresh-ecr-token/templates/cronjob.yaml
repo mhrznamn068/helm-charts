@@ -38,16 +38,32 @@ spec:
               - bash
               - "-c"
               - |
-                echo "Configuring AWS credentials ... "
-                aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-                aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-                aws configure set default.region ${AWS_REGION}  
+                # Validate required AWS environment variables
+                if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
+                  echo "ERROR: AWS_ACCESS_KEY_ID is not set"
+                  exit 1
+                fi
+                if [[ -z "$AWS_SECRET_ACCESS_KEY" ]]; then
+                  echo "ERROR: AWS_SECRET_ACCESS_KEY is not set"
+                  exit 1
+                fi
+                if [[ -z "$AWS_REGION" ]]; then
+                  echo "ERROR: AWS_REGION is not set"
+                  exit 1
+                fi
+                echo "AWS credentials validated (using environment variables)"
                 echo "Getting AWS account ID ... "
                 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
                 echo "AWS_ACCOUNT_ID: $AWS_ACCOUNT_ID"
                 echo "Getting ECR token ... "
-                TOKEN=$(aws ecr --region=$AWS_REGION get-authorization-token --output text | awk '{print $2}' | base64 -d | cut -d: -f2)
-                echo "TOKEN: $TOKEN"
+                TOKEN=$(aws ecr --region=$AWS_REGION get-authorization-token --output text --query 'authorizationData[0].authorizationToken' | base64 -d | cut -d: -f2)
+                if [[ -z "$TOKEN" ]]; then
+                  echo "ERROR: Failed to get ECR token"
+                  exit 1
+                fi
+                echo "TOKEN retrieved successfully"
+                DOCKER_SERVER="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                echo "DOCKER_SERVER: $DOCKER_SERVER"
                 echo "Getting namespaces ... "
                 NAMESPACES=$(kubectl get ns -o jsonpath="{.items[*].metadata.name}")
                 echo "NAMESPACES: $NAMESPACES"
@@ -68,10 +84,17 @@ spec:
                     fi
                    echo "-> Refreshing secrets in namespace: $NS"
                    echo "-> Deleting secret: $SECRET_NAME"
+                   kubectl -n "$NS" delete secret --ignore-not-found "$SECRET_NAME"
                    echo "-> Creating secret: $SECRET_NAME"
-                   kubectl -n $NS delete secret --ignore-not-found "$SECRET_NAME"
-                   kubectl -n $NS create secret docker-registry "$SECRET_NAME" --docker-server=https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com --docker-username=AWS --docker-password="$TOKEN"
-                   echo "-> Secret created successfully"
+                   if kubectl -n "$NS" create secret docker-registry "$SECRET_NAME" \
+                     --docker-server="$DOCKER_SERVER" \
+                     --docker-username=AWS \
+                     --docker-password="$TOKEN"; then
+                     echo "-> Secret created successfully"
+                   else
+                     echo "ERROR: Failed to create secret in namespace $NS"
+                     exit 1
+                   fi
                 done
 
                 if [[ "$RESTART_ARGOCD_IMAGE_UPDATER" == "true" ]]; then
