@@ -25,6 +25,11 @@ spec:
                 value: {{ .Values.ecrCredentials.awsSecretAccessKey }}
               - name: AWS_REGION
                 value: {{ .Values.ecrCredentials.region }}
+              - name: INCLUDE_NAMESPACES
+                value: |
+                    {{- range .Values.includeNamespaces }}
+                      {{ . }}
+                    {{- end }}
               - name: EXCLUDE_NAMESPACES
                 value: | 
                     {{- range .Values.excludeNamespaces }}
@@ -65,7 +70,14 @@ spec:
                 echo "DOCKER_SERVER: $DOCKER_SERVER"
 
                 echo "Getting namespaces ... "
-                NAMESPACES=$(kubectl get ns -o jsonpath="{.items[*].metadata.name}")
+                # If INCLUDE_NAMESPACES is empty, then process all namespaces
+                if [[ -z "$INCLUDE_NAMESPACES" ]]; then
+                  echo "INCLUDE_NAMESPACES is empty, processing all namespaces"
+                  NAMESPACES=$(kubectl get ns -o jsonpath="{.items[*].metadata.name}")
+                else
+                  echo "INCLUDE_NAMESPACES is not empty, processing only the namespaces in INCLUDE_NAMESPACES"
+                  NAMESPACES="${INCLUDE_NAMESPACES}"
+                fi
                 echo "NAMESPACES: $NAMESPACES"
                 
                 for NS in ${NAMESPACES[@]}; do
